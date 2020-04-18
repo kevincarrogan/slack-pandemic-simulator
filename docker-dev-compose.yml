@@ -14,3 +14,10 @@ services:
     restart: always
     volumes:
       - ./.volumes/db:/var/lib/mysql
+  frontends-slack:
+    build: ./frontends_slack
+    ports: ["6010:80"]
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./frontends_slack:/var/www
