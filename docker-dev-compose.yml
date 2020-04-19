@@ -15,9 +15,18 @@ services:
     volumes:
       - ./.volumes/db:/var/lib/mysql
   frontends-slack:
-    build: ./frontends_slack
-    ports: ["6010:80"]
+    build: ./frontends-slack
+    env_file: ./env/dev/frontends-slack.env
+    environment:
+      - DEBUG=1
+    ports:
+      - "6010:80"
     stdin_open: true
     tty: true
     volumes:
-      - ./frontends_slack:/var/www
+      - ./frontends-slack:/var/www
+  ngrok:
+    image: wernight/ngrok
+    command: ngrok http frontends-slack:80
+    ports:
+      - "4040:4040"
