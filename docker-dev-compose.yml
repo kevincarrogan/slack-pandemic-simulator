@@ -4,10 +4,7 @@ services:
   db:
     entrypoint: ['/entrypoint.sh', '--default-authentication-plugin=mysql_native_password']
     environment:
-      MYSQL_DATABASE: pandemic
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: pandemic
-      MYSQL_PASSWORD: panedemic
+      - MYSQL_ROOT_PASSWORD=root
     image: mysql:8.0.17
     ports:
       - "3326:3306"
@@ -30,6 +27,11 @@ services:
     env_file: ./env/dev/services-slack.env
     environment:
       - DEBUG=1
+      - DB_NAME=services_slack
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_PORT=3306
     ports:
       - "6020:80"
     stdin_open: true
