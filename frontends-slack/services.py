@@ -14,5 +14,5 @@ def service_request(service_name, endpoint, payload):
     url = f"{schema}://{service_prefix}{service_name}{endpoint}"
 
     requests.post(
-        url, data=payload,
+        url, json=payload,
     )
