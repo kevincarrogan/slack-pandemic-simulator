@@ -15,3 +15,12 @@ migrate-services-slack:
 
 shell-services-slack:
 		docker-compose -f docker-dev-compose.yml run --rm services-slack python manage.py shell
+
+test-services-people:
+		docker-compose -f docker-dev-compose.yml run --rm services-people python manage.py test
+
+make-migrations-services-people:
+		docker-compose -f docker-dev-compose.yml run --rm services-people python manage.py makemigrations
+
+migrate-services-people:
+		docker-compose -f docker-dev-compose.yml run --rm services-people python manage.py migrate
