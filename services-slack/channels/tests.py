@@ -57,6 +57,15 @@ class MemberViewTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
+    def test_member_joined_doesnt_create_channel(self):
+        self.assertEqual(Channel.objects.count(), 0)
+
+        response = self.client.post(
+            reverse("channels:member"),
+            MEMBER_JOINED_CHANNEL_EVENT,
+            content_type="application/json",
+        )
+
         self.assertEqual(Channel.objects.count(), 0)
 
     def test_bot_added_creates_channel_and_location(self):
