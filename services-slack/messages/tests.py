@@ -12,11 +12,12 @@ CHANNEL_ID = "channel_1234"
 USER_ID = "user_1234"
 BOT_USER_ID = "bot_1234"
 MESSAGE_TIMESTAMP = "1588016001.000200"
+APP_ID = "api_app_1234"
 
 MESSAGE_EVENT = {
     "token": "token",
     "team_id": TEAM_ID,
-    "api_app_id": "api_app_1234",
+    "api_app_id": APP_ID,
     "event": {
         "client_msg_id": "9fd59457-1f74-4e43-9151-7c92d43ea7b3",
         "type": "message",
@@ -31,6 +32,27 @@ MESSAGE_EVENT = {
     "type": "event_callback",
     "event_id": "event_1234",
     "event_time": 1588016001,
+    "authed_users": [USER_ID],
+}
+
+MESSAGE_SUB_TYPE_EVENT = {
+    "token": "token",
+    "team_id": TEAM_ID,
+    "api_app_id": APP_ID,
+    "event": {
+        "type": "message",
+        "subtype": "channel_join",
+        "ts": MESSAGE_TIMESTAMP,
+        "user": USER_ID,
+        "text": f"<@{USER_ID}> has joined the channel",
+        "inviter": USER_ID,
+        "channel": CHANNEL_ID,
+        "event_ts": MESSAGE_TIMESTAMP,
+        "channel_type": "channel",
+    },
+    "type": "event_callback",
+    "event_id": "event_1234",
+    "event_time": 1588105941,
     "authed_users": [USER_ID],
 }
 
@@ -61,3 +83,14 @@ class MessageViewTests(TestCase):
         self.assertEqual(message.channel, self.channel)
         self.assertEqual(message.member, self.member)
         self.assertEqual(message.slack_timestamp, MESSAGE_TIMESTAMP)
+
+    def test_doesnt_create_message_for_sub_types(self):
+        self.assertEqual(Message.objects.count(), 0)
+
+        response = self.client.post(
+            reverse("messages:message"),
+            MESSAGE_SUB_TYPE_EVENT,
+            content_type="application/json",
+        )
+
+        self.assertEqual(Message.objects.count(), 0)

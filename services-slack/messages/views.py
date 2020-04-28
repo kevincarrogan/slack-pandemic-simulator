@@ -15,6 +15,9 @@ class MessageView(View):
         event = json.loads(request.body)
         event_data = event["event"]
 
+        if event_data.get("subtype"):
+            return HttpResponse("NOT CREATED")
+
         team = Team.objects.get(team_id=event["team_id"])
         channel = Channel.objects.get(slack_id=event_data["channel"], team=team)
         member = Member.objects.get(slack_id=event_data["user"])
