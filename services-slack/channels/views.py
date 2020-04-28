@@ -34,7 +34,9 @@ class MemberView(View):
         team = Team.objects.get(team_id=event["team_id"])
 
         if team.bot_user_id == event_data["user"]:
-            channel = Channel.objects.create(slack_id=event_data["channel"], team=team)
+            channel, _ = Channel.objects.get_or_create(
+                slack_id=event_data["channel"], team=team,
+            )
 
             members = self.get_members_of_channel(channel)
             for member in members:

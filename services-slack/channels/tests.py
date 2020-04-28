@@ -68,7 +68,7 @@ class MemberViewTests(TestCase):
 
         self.assertEqual(Channel.objects.count(), 0)
 
-    def test_bot_added_creates_channel_and_location(self):
+    def test_bot_added_creates_channel(self):
         self.assertEqual(Channel.objects.count(), 0)
 
         with patch(
@@ -86,6 +86,21 @@ class MemberViewTests(TestCase):
         channel = Channel.objects.get()
         self.assertEqual(channel.team, self.team)
         self.assertEqual(channel.slack_id, CHANNEL_ID)
+
+    def test_bot_added_doesnt_recreate_channel_if_already_created(self):
+        Channel.objects.create(team=self.team, slack_id=CHANNEL_ID)
+
+        with patch(
+            "channels.views.WebClient.conversations_members"
+        ) as mock_conversations_members:
+            mock_conversations_members.return_value = []
+            response = self.client.post(
+                reverse("channels:member"),
+                BOT_JOINED_CHANNEL_EVENT,
+                content_type="application/json",
+            )
+
+        self.assertEqual(Channel.objects.count(), 1)
 
     def test_bot_added_creates_members_in_channel(self):
         self.assertEqual(Member.objects.count(), 0)
