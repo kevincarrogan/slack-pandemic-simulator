@@ -29,11 +29,7 @@ ALLOWED_HOSTS = ["services-people"]
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.auth",
     "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
     "health",
     "people",
 ]
