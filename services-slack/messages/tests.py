@@ -137,3 +137,31 @@ class MessageViewTests(TestCase):
             set(payload['people_ids']),
             set(person_ids),
         )
+
+    @override_settings(CONTACT_TIMEDELTA=datetime.timedelta(minutes=2))
+    def test_no_post_to_contact_service_when_messages_dont_overlap(self):
+        message_time = datetime.datetime(2018, 9, 27)
+        Message.objects.create(
+            channel=self.channel,
+            member=self.member,
+            slack_timestamp=f'{int(message_time.timestamp())}.000200',
+        )
+
+        another_member = MemberFactory.create(
+            slack_id='user_5678',
+            team=self.team,
+        )
+
+        overlapping_message_time = message_time + datetime.timedelta(minutes=3)
+        overlapping_message_event = create_message_event(
+            message_timestamp=f'{int(overlapping_message_time.timestamp())}.000200',
+            user_id=another_member.slack_id,
+        )
+
+        with patch('messages.views.service_request') as mock_service_request:
+            self.client.post(
+                reverse("messages:message"),
+                overlapping_message_event,
+                content_type="application/json",
+            )
+        mock_service_request.assert_not_called()
