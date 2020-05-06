@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from unittest.mock import patch
 
@@ -6,6 +7,7 @@ from django.test import override_settings, TestCase
 from django.urls import reverse
 
 from channels.models import Channel
+from contacts.models import Contact
 from members.tests.factories import MemberFactory
 from teams.models import Team
 
@@ -116,6 +118,9 @@ class MessageViewTests(TestCase):
         )
 
         with patch("messages.views.service_request") as mock_service_request:
+            mock_service_request.return_value = {
+                "id": uuid.uuid4(),
+            }
             self.client.post(
                 reverse("messages:message"),
                 overlapping_message_event,
@@ -134,6 +139,42 @@ class MessageViewTests(TestCase):
         self.assertEqual(
             set(payload["people_ids"]), set(person_ids),
         )
+
+    @override_settings(CONTACT_TIMEDELTA=datetime.timedelta(minutes=2))
+    def test_saves_contact_id_against_messages_on_overlap(self):
+        message_time = datetime.datetime(2018, 9, 27)
+        Message.objects.create(
+            channel=self.channel,
+            member=self.member,
+            slack_timestamp=f"{int(message_time.timestamp())}.000200",
+        )
+
+        another_member = MemberFactory.create(slack_id="user_0002", team=self.team,)
+
+        overlapping_message_time = message_time + datetime.timedelta(minutes=1)
+        overlapping_message_event = create_message_event(
+            message_timestamp=f"{int(overlapping_message_time.timestamp())}.000200",
+            user_id=another_member.slack_id,
+        )
+
+        contact_id = uuid.uuid4()
+        with patch("messages.views.service_request") as mock_service_request:
+            mock_service_request.return_value = {
+                "id": contact_id,
+            }
+            self.client.post(
+                reverse("messages:message"),
+                overlapping_message_event,
+                content_type="application/json",
+            )
+        message_ids = [message.pk for message in Message.objects.all()]
+        contacts = Contact.objects.filter(contact_id=contact_id)
+        self.assertEqual(contacts.count(), 2)
+        for contact in contacts:
+            self.assertIn(contact.message.pk, message_ids)
+            message_ids.remove(contact.message.pk)
+
+        self.assertEqual(len(message_ids), 0)
 
     @override_settings(CONTACT_TIMEDELTA=datetime.timedelta(minutes=2))
     def test_no_post_to_contact_service_when_messages_dont_overlap(self):
@@ -161,6 +202,9 @@ class MessageViewTests(TestCase):
         )
 
         with patch("messages.views.service_request") as mock_service_request:
+            mock_service_request.return_value = {
+                "id": uuid.uuid4(),
+            }
             self.client.post(
                 reverse("messages:message"),
                 overlapping_message_event,
@@ -195,6 +239,9 @@ class MessageViewTests(TestCase):
         )
 
         with patch("messages.views.service_request") as mock_service_request:
+            mock_service_request.return_value = {
+                "id": uuid.uuid4(),
+            }
             self.client.post(
                 reverse("messages:message"),
                 overlapping_message_event,

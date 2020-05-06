@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.views import View
 
 from channels.models import Channel
+from contacts.models import Contact
 from members.models import Member
 from teams.models import Team
 
@@ -44,6 +45,13 @@ class MessageView(View):
             members = [message.member, overlapping_message.member]
             people_ids = [str(member.person_id) for member in members]
 
-            service_request("contact", "/contact/", {"people_ids": people_ids,})
+            contact_response = service_request(
+                "contact", "/contact/", {"people_ids": people_ids},
+            )
+            contact_id = contact_response["id"]
+            for m in [message, overlapping_message]:
+                Contact.objects.create(
+                    message=m, contact_id=contact_id,
+                )
 
         return HttpResponse("OK")

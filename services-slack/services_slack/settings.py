@@ -12,6 +12,7 @@ ALLOWED_HOSTS = ["services-slack"]
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "channels",
+    "contacts",
     "members",
     "messages",
     "teams",
