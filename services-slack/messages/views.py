@@ -31,27 +31,19 @@ class MessageView(View):
         message = Message.objects.create(
             channel=channel, member=member, slack_timestamp=slack_timestamp,
         )
-        timestamp, _ = slack_timestamp.split('.')
+        timestamp, _ = slack_timestamp.split(".")
         timestamp = int(timestamp)
         message_time = datetime.datetime.fromtimestamp(timestamp)
 
         overlapping_messages = Message.objects.filter(
             timestamp__gte=message_time - settings.CONTACT_TIMEDELTA,
             timestamp__lte=message_time,
-        ).exclude(
-            pk=message.pk,
-        )
-        if overlapping_messages.count() > 0:
-            people_ids = set(overlapping_messages.values_list('member__person_id', flat=True))
-            people_ids.add(member.person_id)
-            people_ids = [str(people_id) for people_id in people_ids]
+        ).exclude(pk=message.pk,)
 
-            service_request(
-                'contact',
-                '/contact/',
-                {
-                    'people_ids': people_ids,
-                },
-            )
+        for overlapping_message in overlapping_messages:
+            members = [message.member, overlapping_message.member]
+            people_ids = [str(member.person_id) for member in members]
+
+            service_request("contact", "/contact/", {"people_ids": people_ids,})
 
         return HttpResponse("OK")

@@ -15,7 +15,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField()
 
     def save(self, *args, **kwargs):
-        timestamp, _ = self.slack_timestamp.split('.')
+        timestamp, _ = self.slack_timestamp.split(".")
         timestamp = int(timestamp)
         timestamp = datetime.datetime.fromtimestamp(timestamp)
         self.timestamp = timestamp
