@@ -42,6 +42,9 @@ class MessageView(View):
         ).exclude(pk=message.pk,)
 
         for overlapping_message in overlapping_messages:
+            if message.member == overlapping_message.member:
+                continue
+
             members = [message.member, overlapping_message.member]
             people_ids = [str(member.person_id) for member in members]
 
