@@ -10,6 +10,7 @@ ALLOWED_HOSTS = ["servies-contact"]
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
+    "contact",
 ]
 
 MIDDLEWARE = [
