@@ -58,6 +58,22 @@ services:
     tty: true
     volumes:
       - ./services-people:/var/www
+  services-contact:
+    build: ./services-contact
+    env_file: ./env/dev/services-contact.env
+    environment:
+      - DEBUG=1
+      - DB_NAME=services_contact
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=root
+      - DB_PORT=3306
+    ports:
+      - "6040:80"
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./services-contact:/var/www
   ngrok:
     image: wernight/ngrok
     env_file: ./env/dev/ngrok.env
