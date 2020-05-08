@@ -112,8 +112,9 @@ class MessageViewTests(TestCase):
         another_member = MemberFactory.create(slack_id="user_0002", team=self.team,)
 
         overlapping_message_time = message_time + datetime.timedelta(minutes=1)
+        overlapping_message_timestamp = int(overlapping_message_time.timestamp())
         overlapping_message_event = create_message_event(
-            message_timestamp=f"{int(overlapping_message_time.timestamp())}.000200",
+            message_timestamp=f"{overlapping_message_timestamp}.000200",
             user_id=another_member.slack_id,
         )
 
@@ -139,6 +140,7 @@ class MessageViewTests(TestCase):
         self.assertEqual(
             set(payload["people_ids"]), set(person_ids),
         )
+        self.assertEqual(payload["at"], overlapping_message_timestamp)
 
     @override_settings(CONTACT_TIMEDELTA=datetime.timedelta(minutes=2))
     def test_saves_contact_id_against_messages_on_overlap(self):
@@ -233,8 +235,9 @@ class MessageViewTests(TestCase):
         )
 
         overlapping_message_time = message_time + datetime.timedelta(minutes=1)
+        overlapping_message_timestamp = int(overlapping_message_time.timestamp())
         overlapping_message_event = create_message_event(
-            message_timestamp=f"{int(overlapping_message_time.timestamp())}.000200",
+            message_timestamp=f"{overlapping_message_timestamp}.000200",
             user_id=message_poster_member.slack_id,
         )
 
@@ -263,6 +266,7 @@ class MessageViewTests(TestCase):
             people_ids = frozenset(payload["people_ids"])
             self.assertIn(people_ids, payloads)
             payloads.remove(people_ids)
+            self.assertEqual(payload["at"], overlapping_message_timestamp)
 
         self.assertEqual(len(payloads), 0)
 

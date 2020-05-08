@@ -49,7 +49,7 @@ class MessageView(View):
             people_ids = [str(member.person_id) for member in members]
 
             contact_response = service_request(
-                "contact", "/contact/", {"people_ids": people_ids},
+                "contact", "/contact/", {"people_ids": people_ids, "at": timestamp},
             )
             contact_id = contact_response["id"]
             for m in [message, overlapping_message]:
