@@ -2,6 +2,7 @@ import datetime
 import json
 
 from django.conf import settings
+from django.db.models import Q
 from django.http import HttpResponse
 from django.views import View
 
@@ -39,12 +40,9 @@ class MessageView(View):
         overlapping_messages = Message.objects.filter(
             timestamp__gte=message_time - settings.CONTACT_TIMEDELTA,
             timestamp__lte=message_time,
-        ).exclude(pk=message.pk,)
+        ).exclude(Q(pk=message.pk) | Q(member=message.member))
 
         for overlapping_message in overlapping_messages:
-            if message.member == overlapping_message.member:
-                continue
-
             members = [message.member, overlapping_message.member]
             people_ids = [str(member.person_id) for member in members]
 
